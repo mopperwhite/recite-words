@@ -66,9 +66,9 @@ export default {
             if(this.ture_answer = gi == this.answer){
                 this.answer.counter ++
                 localStorage[p] = this.answer.counter
-                if(this.answer.counter == max_counter){
+                if(this.answer.counter >= max_counter){
                     localStorage[`item/${this.$route.params.id}:counter`] =
-                        this.answer.counter
+                        ++this.counter
                 }
             }else{
                 this.wrong = gi
@@ -111,7 +111,7 @@ h1, h2, h3{
     font-size: 5em;
 }
 button{
-    margin: 0.5em;
+    margin-y: 0.5em;
     font-size: 2em;
 }
 .process-bar-container{

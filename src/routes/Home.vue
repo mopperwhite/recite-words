@@ -22,7 +22,7 @@ export default {
 }
 </script>
 <style scoped>
-.btn{
+.btn-y{
     font-size: 2em;
     margin: 0.5em;
 }
