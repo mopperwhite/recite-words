@@ -88,6 +88,7 @@ div
 import {youdao} from '../../keys.json'
 import shuffle from 'shuffle-array'
 const max_counter = 2
+const options_num = 4
 export default {
     data(){
         return {
@@ -198,7 +199,7 @@ export default {
                      
             let stbe = [this.answer]
             shuffle(records)
-            for(let i=0; i<3;i++){
+            for(let i=0; i<Math.min(records.length, options_num - 1);i++){
                 stbe.push(records[i])
             }
             shuffle(stbe)
