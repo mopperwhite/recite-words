@@ -67,14 +67,14 @@ div
     div.form-group
         label(for="voiceSelect")
             | 选择声音
-        select.form-control#voiceSelect(v-model = "voice_name", @change="voice = select_voices[voice_name]")
+        select.form-control#voiceSelect(v-model = "voice_name", @change="voice = select_voices[voice_name], save_to_storage('config:voice', voice_name)")
             template(v-for="n in voices_names")
                 option(:value = "n")
                     | {{n}}
     div.form-group
         label(for="voiceSelect")
             | 速度
-        select.form-control#voiceSelect(v-model = "speech_rate")
+        select.form-control#voiceSelect(v-model = "speech_rate", @change="save_to_storage('config:speech_rate', speech_rate)")
             option(:value = "1.0")
                 | 正常
             option(:value = "0.75")
@@ -106,12 +106,15 @@ export default {
             voices_names: [],
             select_voices: {},
             voice_name: '',
-            speech_rate: 1.0,
+            speech_rate:  parseFloat(localStorage['config:speech_rate'] || 1.0),
             the_last_one: false,
             canceled: true,
         }
     },
     methods: {
+        save_to_storage(k, v){
+            localStorage[k] = v
+        },
         guess(gi){
             this.guessing = false
             let p = `item/${this.$route.params.id}/${this.answer.test}:finished`
@@ -215,7 +218,7 @@ export default {
             }
             if(vns.length){
                 console.log("FUVK")
-                this.voice = vs[this.voice_name = vns[0]]
+                this.voice = vs[this.voice_name = localStorage['config:voice'] || vns[0]]
                 this.select_voices = vs
                 this.voices_names = vns
                 clearInterval(intId)
