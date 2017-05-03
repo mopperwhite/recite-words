@@ -48,6 +48,11 @@ div
             div.text-left.process-bar.bg-success(:style = '`width: ${counter*100 / records.length}%;`')
                 | {{counter}}
             | {{records.length - counter}}
+    div.form-group
+        select.form-control(v-model = "voice_name", @change="voice = select_voices[voice_name]")
+            template(v-for="n in voices_names")
+                option(:value = "n")
+                    | {{n}}
         
     
 </template>
@@ -70,6 +75,9 @@ export default {
             voice: null,
             spaekingEnabled: true,
             translation: null,
+            voices_names: [],
+            select_voices: {},
+            voice_name: ''
         }
     },
     methods: {
@@ -109,7 +117,7 @@ export default {
             this.translation = null
             this.skipping= false
             this.guessing = true
-            let records = this.records
+            let may_next = this.records
                 .map(e => {
                     e.counter = parseInt(
                         localStorage[
@@ -119,11 +127,14 @@ export default {
                 }).filter(e => {
                     return e.counter < max_counter
                 })
+            this.answer = may_next[Math.floor(Math.random() * may_next.length)]
+            let records = this.records.filter(e => {
+                return e.test != this.answer.test && e.answer != this.answer.answer 
+            })
                      
-            let stbe = []
+            let stbe = [this.answer]
             shuffle(records)
-            this.answer = records[0]
-            for(let i=0; i<4;i++){
+            for(let i=0; i<3;i++){
                 stbe.push(records[i])
             }
             shuffle(stbe)
@@ -133,13 +144,19 @@ export default {
     },
     created(){
         let intId = setInterval( () => {
+            let vs = {}, vns = []
             for(let voice of speechSynthesis.getVoices()){
-                if(voice.lang.match(/en/i) || voice.name.match(/en/i)){
-                    this.voice = voice
-                    break
+                if(voice.lang.match(/^en-/)) {
+                    let name = `${voice.name}(${voice.lang})`
+                    vns.push(name)
+                    vs[name] = voice
                 }
             }
-            if(this.voice){
+            if(vns.length){
+                console.log("FUVK")
+                this.voice = vs[this.voice_name = vns[0]]
+                this.select_voices = vs
+                this.voices_names = vns
                 clearInterval(intId)
             }
         }, 10)
