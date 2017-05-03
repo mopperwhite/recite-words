@@ -1,7 +1,15 @@
 <template lang="jade">
 div
-    h1.text-center
+    h4.text-warning.text-center(v-if="!voice")
+        | 正在加载读音数据
+    h1.text-center(@click="translate(answer.test)")
         | {{answer.test}}
+    div.bg-info(v-if="translation")
+        h4.muted
+            | {{translation.query}}
+        h4
+            | {{translation.translation}}
+        div(v-html="translation.explain")
     div(v-if="skipping")
         h3.text-center.text-success
             | {{answer.answer}}
@@ -25,12 +33,13 @@ div
                 h3.text-center.text-danger
                     | 错误
                 h3.text-center.text-muted.small
-                    del
+                    del(@click="translate(wrong.answer)")
                         | {{wrong.answer}}
-                    span
+                    span(@click="translate(wrong.test)")
                         | ({{wrong.test}})
-            h3.text-center.text-success
+            h3.text-center.text-success(@click="translate(answer.answer)")
                 | {{answer.answer}}
+                br
                 span.small
                     | {{answer.counter}} / {{max_counter}}
             button.btn.btn-block.btn-success(@click="next_word")
@@ -43,6 +52,7 @@ div
     
 </template>
 <script>
+import {youdao} from '../../keys.json'
 import shuffle from 'shuffle-array'
 const max_counter = 2
 export default {
@@ -57,6 +67,9 @@ export default {
             ture_answer: false,
             wrong: '',
             skipping: false,
+            voice: null,
+            spaekingEnabled: true,
+            translation: null,
         }
     },
     methods: {
@@ -73,8 +86,27 @@ export default {
             }else{
                 this.wrong = gi
             }
+            this.speak(this.answer.answer)
+        },
+        translate (text) {
+            this.$http.jsonp(`http://fanyi.youdao.com/openapi.do?keyfrom=${youdao.keyfrom}&key=${youdao.key}&type=data&doctype=jsonp&version=1.1&q=${encodeURI(text)}`)
+                .then(res => res.json())
+                .then(res => {
+                    this.translation = {
+                        query: res.query,
+                        translation: res.translation.join("/"),
+                        explain: res.basic.explains.join("\n<br/>\n")
+                    }
+                })
+        },
+        speak(text){
+            if(!this.voice || !this.spaekingEnabled || !window.SpeechSynthesisUtterance) return;
+            let utterThis = new window.SpeechSynthesisUtterance(text);
+            utterThis.voice = this.voice
+            window.speechSynthesis.speak(utterThis);
         },
         next_word(){
+            this.translation = null
             this.skipping= false
             this.guessing = true
             let records = this.records
@@ -96,9 +128,21 @@ export default {
             }
             shuffle(stbe)
             this.selectable = stbe
+            this.speak(this.answer.test)
         },
     },
     created(){
+        let intId = setInterval( () => {
+            for(let voice of speechSynthesis.getVoices()){
+                if(voice.lang.match(/en/i) || voice.name.match(/en/i)){
+                    this.voice = voice
+                    break
+                }
+            }
+            if(this.voice){
+                clearInterval(intId)
+            }
+        }, 10)
         this.records = JSON.parse(
             localStorage[`item/${this.$route.params.id}`]).data
         this.next_word()
@@ -110,7 +154,7 @@ h1, h2, h3{
     color: white;
     font-size: 5em;
 }
-button{
+.btn{
     margin-y: 0.5em;
     font-size: 2em;
 }
