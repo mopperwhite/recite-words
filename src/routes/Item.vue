@@ -48,10 +48,10 @@ div
                     | {{answer.counter}} / {{max_counter}}
             button.btn.btn-block.btn-success(@click="next_word")
                 | 下一个
-        span.process-bar-container.bg-muted.text-right
-            div.text-left.process-bar.bg-success(:style = '`width: ${counter*100 / records.length}%;`')
-                | {{counter}}
-            | {{records.length - counter}}
+    span.process-bar-container.bg-muted.text-right
+        div.text-left.process-bar.bg-success(:style = '`width: ${counter*100 / records.length}%;`')
+            | {{counter}}
+        | {{records.length - counter}}
     div.form-group
         label(for="voiceSelect")
             | 选择声音
@@ -198,7 +198,9 @@ h1, h2, h3{
     display: block;
     width: 100%;
     height: 2em;
-    position: relative;
+    left: 0;
+    bottom: 0;
+    position: fixed;
 }
 .process-bar{
     height: 2em;
