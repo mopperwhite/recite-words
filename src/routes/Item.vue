@@ -4,14 +4,18 @@ div
         | 正在加载读音数据
     h1.text-center(@click="translate(answer.test)")
         | {{answer.test}}
-    div.bg-info(v-if="translation")
-        h4.muted
-            | {{translation.query}}
-        h4
-            | {{translation.translation}}
-        div(v-html="translation.explain")
+    div.bg-info(v-if="translation != null")
+        template(v-if="translation")
+            h4.muted
+                | {{translation.query}}
+            h4
+                | {{translation.translation}}
+            div(v-html="translation.explain")
+        template(v-else)
+            h4.bg-warning
+                | 未找到
     div(v-if="skipping")
-        h3.text-center.text-success
+        h3.text-center.text-success(@click="translate(answer.answer)")
             | {{answer.answer}}
             span.small
                 | {{answer.counter}} / {{max_counter}}
@@ -23,7 +27,7 @@ div
                 button.btn.btn-block.btn-default(@click="guess(st)")
                     | {{st && st.answer}}
             
-            button.btn-warning.btn.btn-block(@click="skipping = true")
+            button.btn-warning.btn.btn-block(@click="speak(answer.answer), skipping = true")
                     | 跳过
         div(v-else)
             div(v-if="ture_answer")
@@ -103,7 +107,7 @@ export default {
                     this.translation = {
                         query: res.query,
                         translation: res.translation.join("/"),
-                        explain: res.basic.explains.join("\n<br/>\n")
+                        explain: res.basic && res.basic.explains && res.basic.explains.join("\n<br/>\n") || ''
                     }
                 })
         },
