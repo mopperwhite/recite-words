@@ -14,40 +14,52 @@ div
         template(v-else)
             h4.bg-warning
                 | 未找到
-    div(v-if="skipping")
-        h3.text-center.text-success(@click="translate(answer.answer)")
-            | {{answer.answer}}
-            span.small
-                | {{answer.counter}} / {{max_counter}}
-        button.btn.btn-block.btn-success(@click="next_word")
-                | 下一个
+
+    template(v-if="the_last_one")
+        h2.text-danger
+            | 已经，没有更多了
+        button.btn.btn-block.btn-danger(@click="try_again")
+            | 再来一次?
     template(v-else)
-        div(v-if="guessing")
-            template(v-for="st in selectable")
-                button.btn.btn-block.btn-default(@click="guess(st)")
-                    | {{st && st.answer}}
-            
-            button.btn-warning.btn.btn-block(@click="speak(answer.answer), skipping = true")
-                    | 跳过
-        div(v-else)
-            div(v-if="ture_answer")
-                h3.text-center.text-success
-                    | 正确
-            div(v-else)
-                h3.text-center.text-danger
-                    | 错误
-                h3.text-center.text-muted.small
-                    del(@click="translate(wrong.answer)")
-                        | {{wrong.answer}}
-                    span(@click="translate(wrong.test)")
-                        | ({{wrong.test}})
+        div(v-if="skipping")
             h3.text-center.text-success(@click="translate(answer.answer)")
                 | {{answer.answer}}
-                br
                 span.small
                     | {{answer.counter}} / {{max_counter}}
             button.btn.btn-block.btn-success(@click="next_word")
-                | 下一个
+                    | 下一个
+        template(v-else)
+            div(v-if="guessing")
+                template(v-for="st in selectable")
+                    button.btn.btn-block.btn-default(@click="guess(st)")
+                        | {{st && st.answer}}
+                
+                button.btn-warning.btn.btn-block(@click="speak(answer.answer), skipping = true")
+                        | 跳过
+            div(v-else)
+                div(v-if="ture_answer")
+                    h3.text-center.text-success
+                        | 正确
+                div(v-else)
+                    h3.text-center.text-danger
+                        | 错误
+                    h3.text-center.text-muted.small
+                        del(@click="translate(wrong.answer)")
+                            | {{wrong.answer}}
+                        span(@click="translate(wrong.test)")
+                            | ({{wrong.test}})
+                h3.text-center.text-success(@click="translate(answer.answer)")
+                    | {{answer.answer}}
+                    br
+                    span.small
+                        | {{answer.counter}} / {{max_counter}}
+                button.btn.btn-block.btn-success(@click="next_word")
+                    | 下一个
+                button.btn.btn-block.btn-danger(
+                        :class="{'disabled': canceled}",
+                        @click="cancel_this", 
+                        v-if="ture_answer")
+                    | 这是个意外！
     span.process-bar-container.bg-muted.text-right
         div.text-left.process-bar.bg-success(:style = '`width: ${counter*100 / records.length}%;`')
             | {{counter}}
@@ -95,6 +107,8 @@ export default {
             select_voices: {},
             voice_name: '',
             speech_rate: 1.0,
+            the_last_one: false,
+            canceled: true,
         }
     },
     methods: {
@@ -108,6 +122,7 @@ export default {
                     localStorage[`item/${this.$route.params.id}:counter`] =
                         ++this.counter
                 }
+                this.canceled = false
             }else{
                 this.wrong = gi
             }
@@ -132,6 +147,29 @@ export default {
             utterThis.voice = this.voice
             window.speechSynthesis.speak(utterThis);
         },
+        try_again(){
+            if(!confirm("将删除本项目下的所有进度记录\n确定？"))
+                return;
+            this.counter = 0
+            delete localStorage[`item/${this.$route.params.id}:counter`]
+            for(let e of this.records){
+                delete localStorage[`item/${this.$route.params.id}/${e.test}:finished`]
+            }
+            this.records = JSON.parse(
+                localStorage[`item/${this.$route.params.id}`]).data
+            this.the_last_one = false
+            this.next_word()
+        },
+        cancel_this(){
+            let p = `item/${this.$route.params.id}/${this.answer.test}:finished`
+            if(this.answer.counter >= max_counter){
+                    localStorage[`item/${this.$route.params.id}:counter`] =
+                        --this.counter
+            }
+            this.answer.counter --
+            localStorage[p] = this.answer.counter
+            this.canceled = true
+        },
         next_word(){
             this.translation = null
             this.skipping= false
@@ -146,6 +184,10 @@ export default {
                 }).filter(e => {
                     return e.counter < max_counter
                 })
+            if(may_next.length == 0){
+                this.the_last_one = true
+                return
+            }
             this.answer = may_next[Math.floor(Math.random() * may_next.length)]
             let records = this.records.filter(e => {
                 return e.test != this.answer.test && e.answer != this.answer.answer 
