@@ -53,12 +53,24 @@ div
                 | {{counter}}
             | {{records.length - counter}}
     div.form-group
-        select.form-control(v-model = "voice_name", @change="voice = select_voices[voice_name]")
+        label(for="voiceSelect")
+            | 选择声音
+        select.form-control#voiceSelect(v-model = "voice_name", @change="voice = select_voices[voice_name]")
             template(v-for="n in voices_names")
                 option(:value = "n")
                     | {{n}}
-        
-    
+    div.form-group
+        label(for="voiceSelect")
+            | 速度
+        select.form-control#voiceSelect(v-model = "speech_rate")
+            option(:value = "1.0")
+                | 正常
+            option(:value = "0.75")
+                | 略慢
+            option(:value = "0.5")
+                | 慢
+            option(:value = "0.25")
+                | 慢慢慢
 </template>
 <script>
 import {youdao} from '../../keys.json'
@@ -81,7 +93,8 @@ export default {
             translation: null,
             voices_names: [],
             select_voices: {},
-            voice_name: ''
+            voice_name: '',
+            speech_rate: 1.0,
         }
     },
     methods: {
@@ -112,8 +125,10 @@ export default {
                 })
         },
         speak(text){
-            if(!this.voice || !this.spaekingEnabled || !window.SpeechSynthesisUtterance) return;
+            if(!this.spaekingEnabled || !window.SpeechSynthesisUtterance) return;
             let utterThis = new window.SpeechSynthesisUtterance(text);
+            utterThis.lang = 'en-US' // 结果只要改语言就能正常！！！
+            utterThis.rate = this.speech_rate
             utterThis.voice = this.voice
             window.speechSynthesis.speak(utterThis);
         },
