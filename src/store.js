@@ -1,10 +1,14 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+
 import firebase from './firebase'
+import bus from './bus'
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
+        firebase_initialized: false,
         firebase_user: null,
         voice: null,
         voices: {},
@@ -43,7 +47,9 @@ export default new Vuex.Store({
             localStorage['config:speech_rate'] = rate
         },
         set_firebase_user(state, user){
+            state.firebase_initialized = true
             state.firebase_user = user
+            bus.$emit('firebase_initialized', user)
         }
     },
     actions: {
