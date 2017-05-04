@@ -3877,6 +3877,10 @@ vue-loader@^11.1.4:
     vue-style-loader "^2.0.0"
     vue-template-es2015-compiler "^1.2.2"
 
+vue-localstorage@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.npmjs.org/vue-localstorage/-/vue-localstorage-0.1.3.tgz#929f740999985b93d01a910f66ec540062650f60"
+
 vue-resource@^1.3.1:
   version "1.3.1"
   resolved "https://registry.npmjs.org/vue-resource/-/vue-resource-1.3.1.tgz#bf2f7b70bfe21b397c9d7607878f776a3acea2cf"
@@ -3912,6 +3916,10 @@ vue@^2.2.1:
 vuefire@^1.4.2:
   version "1.4.2"
   resolved "https://registry.npmjs.org/vuefire/-/vuefire-1.4.2.tgz#ff4daa9cc5943090ed5d736ad1337e93fa693671"
+
+vuex@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/vuex/-/vuex-2.3.1.tgz#cde8e997c1f9957719bc7dea154f9aa691d981a6"
 
 watchpack@^1.3.1:
   version "1.3.1"

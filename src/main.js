@@ -5,11 +5,14 @@ import Firebase from 'firebase'
 import VueFire from 'vuefire'
 import App from './App.vue'
 
+import store from './store'
 import router from './router'
 
 Vue.use(VueRouter)
 Vue.use(VueFire)
 Vue.use(VueResource)
+
+store.commit('initVoices')
 
 new Vue({
   components: {

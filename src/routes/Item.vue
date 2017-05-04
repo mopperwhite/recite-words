@@ -1,6 +1,6 @@
 <template lang="jade">
 div
-    h4.text-warning.text-center(v-if="!voice")
+    h4.text-warning.text-center(v-if="!store.state.voice")
         | 正在加载读音数据
     h1.text-center(@click="translate(answer.test)")
         | {{answer.test}}
@@ -64,27 +64,10 @@ div
         div.text-left.process-bar.bg-success(:style = '`width: ${counter*100 / records.length}%;`')
             | {{counter}}
         | {{records.length - counter}}
-    div.form-group
-        label(for="voiceSelect")
-            | 选择声音
-        select.form-control#voiceSelect(v-model = "voice_name", @change="voice = select_voices[voice_name], save_to_storage('config:voice', voice_name)")
-            template(v-for="n in voices_names")
-                option(:value = "n")
-                    | {{n}}
-    div.form-group
-        label(for="voiceSelect")
-            | 速度
-        select.form-control#voiceSelect(v-model = "speech_rate", @change="save_to_storage('config:speech_rate', speech_rate)")
-            option(:value = "1.0")
-                | 正常
-            option(:value = "0.75")
-                | 略慢
-            option(:value = "0.5")
-                | 慢
-            option(:value = "0.25")
-                | 慢慢慢
+    
 </template>
 <script>
+import store from '../store'
 import {youdao} from '../../keys.json'
 import shuffle from 'shuffle-array'
 const max_counter = 2
@@ -92,6 +75,7 @@ const options_num = 4
 export default {
     data(){
         return {
+            store,
             max_counter,
             answer: {},
             records: [],
@@ -147,8 +131,8 @@ export default {
             if(!this.spaekingEnabled || !window.SpeechSynthesisUtterance) return;
             let utterThis = new window.SpeechSynthesisUtterance(text);
             utterThis.lang = 'en-US' // 结果只要改语言就能正常！！！
-            utterThis.rate = this.speech_rate
-            utterThis.voice = this.voice
+            utterThis.rate = this.store.state.speech_rate
+            utterThis.voice = this.store.state.voice
             window.speechSynthesis.speak(utterThis);
         },
         try_again(){
@@ -208,23 +192,6 @@ export default {
         },
     },
     created(){
-        let intId = setInterval( () => {
-            let vs = {}, vns = []
-            for(let voice of speechSynthesis.getVoices()){
-                if(voice.lang.match(/^en-/)) {
-                    let name = `${voice.name}(${voice.lang})`
-                    vns.push(name)
-                    vs[name] = voice
-                }
-            }
-            if(vns.length){
-                console.log("FUVK")
-                this.voice = vs[this.voice_name = localStorage['config:voice'] || vns[0]]
-                this.select_voices = vs
-                this.voices_names = vns
-                clearInterval(intId)
-            }
-        }, 10)
         this.records = JSON.parse(
             localStorage[`item/${this.$route.params.id}`]).data
         this.next_word()
@@ -232,13 +199,23 @@ export default {
 }
 </script>
 <style scoped>
+.btn{
+    font-size: 1.5em;
+}
+select{
+    height: 2em;
+}
+@media (pointer:coarse){
+    .btn{
+        font-size: 2em;
+    }
+}
 h1, h2, h3{
     color: white;
     font-size: 5em;
 }
 .btn{
-    margin-y: 0.5em;
-    font-size: 2em;
+    margin-y: 0.8em;
 }
 .process-bar-container{
     display: block;

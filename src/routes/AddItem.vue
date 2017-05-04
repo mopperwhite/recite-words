@@ -6,6 +6,16 @@ div
         input.form-control(v-model="title")
     div.form-group
         label
+            | 数据格式
+        select.form-control(v-model="data_type")
+            option(value="json")
+                | JSON
+            option(value="csv")
+                | CSV
+            option(value="alternate")
+                | 按行交替
+    div.form-group
+        label
             | 数据
         textarea.form-control(v-model="yaml_data", row=15)
     button.btn.btn-block.btn-primary(@click="submit")
@@ -18,15 +28,50 @@ export default {
         return {
             title: '',
             yaml_data: '',
+            data_type: 'json',
+            test_lang: 'en-US',
+            answer_lang: 'en-US',
         }
     },
     methods: {
         submit(){
             let new_id = parseInt(localStorage['id_counter'] || 0)
+            let data
+            switch(this.data_type){
+                case 'json':
+                    data = JSON.parse(this.yaml_data)
+                break
+                case 'csv':
+                    data = this.yaml_data
+                        .split("\n")
+                        .map(line =>{
+                            let [test, answer] = line.split(/,|\t/)
+                            return {test, answer}
+                        })
+                break
+                case 'alternate':
+                    data = []
+                    let lines = this.yaml_data.split("\n")
+                    for(let i=0; i<lines.length; i++){
+                        if(i % 2){
+                            data.push({
+                                test: lines[i-1],
+                                answer: lines[i]
+                            })
+                        }
+                    }
+                break
+            }
             localStorage[`item/${new_id}`] = JSON.stringify({
                 id: new_id,
                 title: this.title,
-                data: JSON.parse(this.yaml_data)
+                data,
+                meta: {
+                    lang: {
+                        test: this.test_lang,
+                        answer: this.answer_lang
+                    }
+                }
             })
             localStorage['id_counter'] = new_id + 1
             this.$router.replace('/')

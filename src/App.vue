@@ -1,6 +1,10 @@
 <template lang="jade">
-div
+div#body
   router-view
+  footer.footer
+    router-link.btn.btn-link.btn-block(to="/dashboard")
+          i.fa.fa-cog
+          | Dashboard
 </template>
 
 <script>
@@ -40,5 +44,18 @@ li {
 
 a {
   color: #42b983;
+}
+
+.footer{
+  height: 10em;
+}
+
+@media (min-width: 1000px){
+    #body{
+        position: absolute;
+        left: 10%;
+        right: 10%;
+        width: 80%;
+    }
 }
 </style>

@@ -7,6 +7,7 @@ div
         | 添加
 </template>
 <script>
+import myfire from '../myfire'
 export default {
     data() {
         return {
@@ -18,6 +19,9 @@ export default {
         for(let i = 0; i < items_n; i++){
             this.items.push(JSON.parse(localStorage[`item/${i}`]))
         }    
+    },
+    firebase: {
+        items: myfire.ref('items')
     }
 }
 </script>

@@ -1,0 +1,8 @@
+{
+  "apiKey": "AIzaSyCzsKXTPZRiqfX36UzJiBTu3xjDC7Wyt2E",
+  "authDomain": "recite-words.firebaseapp.com",
+  "databaseURL": "https://recite-words.firebaseio.com",
+  "projectId": "recite-words",
+  "storageBucket": "recite-words.appspot.com",
+  "messagingSenderId": "579549094672"
+}
