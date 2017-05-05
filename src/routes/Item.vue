@@ -239,6 +239,7 @@ export default {
             this.selectable = stbe
             this.speak(this.answer.test, this.item.meta.lang.test)
             if(this.store.state.free_mode){
+                this.remain_time = 100
                 this.free_mode_interval = setInterval(() => {
                     this.remain_time-=0.5
                     if(!this.remain_time){
