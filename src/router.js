@@ -12,7 +12,7 @@ import Index from './routes/Index.vue'
 import firebase from './firebase'
 
 const routes = [
-  { path: '/', component: Index},
+  { path: '/', redirect: '/home'},
   { path: '/home', component: Home},
   { path: '/item/:id', component: Item},
   { path: '/additem', component: AddItem},

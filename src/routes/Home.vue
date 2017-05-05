@@ -7,7 +7,8 @@ div
         | 添加
 </template>
 <script>
-import myfire from '../myfire'
+import firebase from '../firebase'
+import store from '../store'
 export default {
     data() {
         return {
@@ -16,12 +17,14 @@ export default {
     },
     created(){
         const items_n = parseInt(localStorage['id_counter']) || 0
-        for(let i = 0; i < items_n; i++){
-            this.items.push(JSON.parse(localStorage[`item/${i}`]))
-        }    
-    },
-    firebase: {
-        items: myfire.ref('items')
+        // for(let i = 0; i < items_n; i++){
+        //     this.items.push(JSON.parse(localStorage[`item/${i}`]))
+        // }
+        let ref = firebase.database().ref(`/users/${store.state.firebase_user.uid}/items`)
+        console.log(ref)
+        ref.on('value', (snapshot) => {
+            this.items = snapshot.val()
+        })
     }
 }
 </script>

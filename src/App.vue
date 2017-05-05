@@ -1,6 +1,7 @@
 <template lang="jade">
 div#body
-  router-view
+  router-view(v-if="store.state.firebase_initialized")
+  index(v-else)
   footer.footer
     router-link.btn.btn-link.btn-block(to="/dashboard")
           i.fa.fa-cog
@@ -8,13 +9,31 @@ div#body
 </template>
 
 <script>
+import store from './store'
+import Index from './routes/Index.vue'
+import bus from './bus'
 export default {
   name: 'app',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      store
     }
-  }
+  },
+  components: {
+    Index
+  },
+  methods:{
+        switch(user){
+            if(!user){
+               this.$router.replace('/account')   
+            }
+        }
+    },
+    created(){
+        bus.$on('firebase_initialized', user => {
+            this.switch(user)
+        })
+    }
 }
 </script>
 

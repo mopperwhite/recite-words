@@ -7,14 +7,5 @@ div
 import store from '../store'
 import bus from '../bus'
 export default {
-    created(){
-        bus.$on('firebase_initialized', user => {
-            if(user){
-                this.$router.replace('/home')
-            }else{
-                this.$router.replace('/account')
-            }
-        })
-    }
 }
 </script>

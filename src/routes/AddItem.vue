@@ -23,12 +23,14 @@ div
 </template>
 <script>
 // import YAML from 'yaml'
+import firebase from '../firebase'
+import store from '../store'
 export default {
     data () {
         return {
             title: '',
             yaml_data: '',
-            data_type: 'json',
+            data_type: 'alternate',
             test_lang: 'en-US',
             answer_lang: 'en-US',
         }
@@ -62,18 +64,40 @@ export default {
                     }
                 break
             }
-            localStorage[`item/${new_id}`] = JSON.stringify({
+            
+            let item = {
                 id: new_id,
                 title: this.title,
-                data,
+                counter: 0,
                 meta: {
                     lang: {
                         test: this.test_lang,
                         answer: this.answer_lang
                     }
                 }
-            })
+            }
+            localStorage[`item/${new_id}`] = JSON.stringify(item)
             localStorage['id_counter'] = new_id + 1
+            
+            let records = {}
+            data.forEach(r => {
+                r.success_counter = 0
+                r.failed_counter = 0
+                records[r.test] = r
+            })
+
+            let uid = store.state.firebase_user.uid
+            let iref = firebase.database().ref(`/users/${uid}/items`).push(item)
+            let dref = firebase.database().ref(`/users/${uid}/datas`).push({
+                records
+            })
+            iref.update({
+                id: iref.getKey(),
+                data: dref.getKey()
+            })
+            dref.update({
+                item: iref.getKey()
+            })
             this.$router.replace('/')
         }
     },

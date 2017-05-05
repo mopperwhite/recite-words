@@ -2,74 +2,78 @@
 div
     h4.text-warning.text-center(v-if="!store.state.voice")
         | 正在加载读音数据
-    h1.text-center(@click="translate(answer.test)")
-        | {{answer.test}}
-    div.bg-info(v-if="translation != null")
-        template(v-if="translation")
-            h4.muted
-                | {{translation.query}}
-            h4
-                | {{translation.translation}}
-            div(v-html="translation.explain")
-        template(v-else)
-            h4.bg-warning
-                | 未找到
-
-    template(v-if="the_last_one")
-        h2.text-danger
-            | 已经，没有更多了
-        button.btn.btn-block.btn-danger(@click="try_again")
-            | 再来一次?
+    h4.text-warning.text-center(v-if="loading_data")
+        | 正在加载项目
     template(v-else)
-        div(v-if="skipping")
-            h3.text-center.text-success(@click="translate(answer.answer)")
-                | {{answer.answer}}
-                span.small
-                    | {{answer.counter}} / {{max_counter}}
-            button.btn.btn-block.btn-success(@click="next_word")
-                    | 下一个
+        h1.text-center(@click="translate(answer.test)")
+            | {{answer.test}}
+        div.bg-info(v-if="translation != null")
+            template(v-if="translation")
+                h4.muted
+                    | {{translation.query}}
+                h4
+                    | {{translation.translation}}
+                div(v-html="translation.explain")
+            template(v-else)
+                h4.bg-warning
+                    | 未找到
+
+        template(v-if="the_last_one")
+            h2.text-danger
+                | 已经，没有更多了
+            button.btn.btn-block.btn-danger(@click="try_again")
+                | 再来一次?
         template(v-else)
-            div(v-if="guessing")
-                template(v-for="st in selectable")
-                    button.btn.btn-block.btn-default(@click="guess(st)")
-                        | {{st && st.answer}}
-                
-                button.btn-warning.btn.btn-block(@click="speak(answer.answer), skipping = true")
-                        | 跳过
-            div(v-else)
-                div(v-if="ture_answer")
-                    h3.text-center.text-success
-                        | 正确
-                div(v-else)
-                    h3.text-center.text-danger
-                        | 错误
-                    h3.text-center.text-muted.small
-                        del(@click="translate(wrong.answer)")
-                            | {{wrong.answer}}
-                        span(@click="translate(wrong.test)")
-                            | ({{wrong.test}})
+            div(v-if="skipping")
                 h3.text-center.text-success(@click="translate(answer.answer)")
                     | {{answer.answer}}
-                    br
                     span.small
                         | {{answer.counter}} / {{max_counter}}
                 button.btn.btn-block.btn-success(@click="next_word")
-                    | 下一个
-                button.btn.btn-block.btn-danger(
-                        :class="{'disabled': canceled}",
-                        @click="cancel_this", 
-                        v-if="ture_answer")
-                    | 这是个意外！
-    span.process-bar-container.bg-muted.text-right
-        div.text-left.process-bar.bg-success(:style = '`width: ${counter*100 / records.length}%;`')
-            | {{counter}}
-        | {{records.length - counter}}
+                        | 下一个
+            template(v-else)
+                div(v-if="guessing")
+                    template(v-for="st in selectable")
+                        button.btn.btn-block.btn-default(@click="guess(st)")
+                            | {{st && st.answer}}
+                    
+                    button.btn-warning.btn.btn-block(@click="speak(answer.answer), skipping = true")
+                            | 跳过
+                div(v-else)
+                    div(v-if="ture_answer")
+                        h3.text-center.text-success
+                            | 正确
+                    div(v-else)
+                        h3.text-center.text-danger
+                            | 错误
+                        h3.text-center.text-muted.small
+                            del(@click="translate(wrong.answer)")
+                                | {{wrong.answer}}
+                            span(@click="translate(wrong.test)")
+                                | ({{wrong.test}})
+                    h3.text-center.text-success(@click="translate(answer.answer)")
+                        | {{answer.answer}}
+                        br
+                        span.small
+                            | {{answer.success_counter}} / {{max_counter}}
+                    button.btn.btn-block.btn-success(@click="next_word")
+                        | 下一个
+                    button.btn.btn-block.btn-danger(
+                            :class="{'disabled': canceled}",
+                            @click="cancel_this", 
+                            v-if="ture_answer")
+                        | 这是个意外！
+        span.process-bar-container.bg-muted.text-right
+            div.text-left.process-bar.bg-success(:style = '`width: ${item.counter*100 / records.length}%;`')
+                | {{item.counter}}
+            | {{records.length - item.counter}}
     
 </template>
 <script>
 import store from '../store'
 import {youdao} from '../../keys.json'
 import shuffle from 'shuffle-array'
+import firebase from '../firebase'
 const max_counter = 2
 const options_num = 4
 export default {
@@ -77,10 +81,21 @@ export default {
         return {
             store,
             max_counter,
+            item: {
+                "counter" : 0,
+                "data" : "",
+                "id" : "",
+                "meta" : {
+                    "lang" : {
+                    "answer" : "en-US",
+                    "test" : "en-US"
+                    }
+                },
+                "title" : ""
+            },
             answer: {},
             records: [],
             selectable: [],
-            counter: parseInt(localStorage[`item/${this.$route.params.id}:counter`] || 0),
             guessing: true,
             ture_answer: false,
             wrong: '',
@@ -94,6 +109,8 @@ export default {
             speech_rate:  parseFloat(localStorage['config:speech_rate'] || 1.0),
             the_last_one: false,
             canceled: true,
+            item_ref: null,
+            loading_data: true
         }
     },
     methods: {
@@ -102,17 +119,28 @@ export default {
         },
         guess(gi){
             this.guessing = false
-            let p = `item/${this.$route.params.id}/${this.answer.test}:finished`
+            let uid = store.state.firebase_user.uid
+            let db = firebase.database()
+            let id = this.$route.params.id
+            let p = `/users/${uid}/datas/${this.item.data}/records/${this.answer.test}`
             if(this.ture_answer = gi == this.answer){
-                this.answer.counter ++
-                localStorage[p] = this.answer.counter
-                if(this.answer.counter >= max_counter){
-                    localStorage[`item/${this.$route.params.id}:counter`] =
-                        ++this.counter
+                this.answer.success_counter ++
+                db.ref(p).update({
+                    success_counter: this.answer.success_counter
+                })
+                if(this.answer.success_counter >= max_counter){
+                    this.item.counter ++
+                    this.item_ref.update({
+                        counter: this.item.counter
+                    })
                 }
                 this.canceled = false
             }else{
                 this.wrong = gi
+                this.answer.failed_counter ++
+                db.ref(p).update({
+                    failed_counter: this.answer.failed_counter
+                })
             }
             this.speak(this.answer.answer)
         },
@@ -136,15 +164,22 @@ export default {
             window.speechSynthesis.speak(utterThis);
         },
         try_again(){
+            let uid = store.state.firebase_user.uid
+            let db = firebase.database()
+            let id = this.$route.params.id
             if(!confirm("将删除本项目下的所有进度记录\n确定？"))
                 return;
-            this.counter = 0
-            delete localStorage[`item/${this.$route.params.id}:counter`]
-            for(let e of this.records){
-                delete localStorage[`item/${this.$route.params.id}/${e.test}:finished`]
+            this.item.counter = 0
+            this.item_ref.update({counter: 0})
+            for(let r of this.records){
+                r.success_counter =
+                r.failed_counter  = 0
+                let p = `/users/${uid}/datas/${this.item.data}/records/${r.test}`
+                db.ref(p).update({
+                    success_counter: 0,
+                    failed_counter: 0
+                })
             }
-            this.records = JSON.parse(
-                localStorage[`item/${this.$route.params.id}`]).data
             this.the_last_one = false
             this.next_word()
         },
@@ -163,14 +198,8 @@ export default {
             this.skipping= false
             this.guessing = true
             let may_next = this.records
-                .map(e => {
-                    e.counter = parseInt(
-                        localStorage[
-                        `item/${this.$route.params.id}/${e.test}:finished`]
-                         || 0 )
-                    return e
-                }).filter(e => {
-                    return e.counter < max_counter
+                .filter(e => {
+                    return e.success_counter < max_counter
                 })
             if(may_next.length == 0){
                 this.the_last_one = true
@@ -192,9 +221,33 @@ export default {
         },
     },
     created(){
-        this.records = JSON.parse(
-            localStorage[`item/${this.$route.params.id}`]).data
-        this.next_word()
+        // this.records = JSON.parse(
+        //     localStorage[`item/${this.$route.params.id}`]).data
+        let uid = store.state.firebase_user.uid
+        let db = firebase.database()
+        let id = this.$route.params.id
+        this.item_ref = db.ref(`/users/${uid}/items/${id}`)
+        this.item_ref.once('value', (isnap) => {
+            let item = isnap.val()
+            db.ref(`/users/${uid}/datas/${item.data}`)
+                .once('value', (dsnap) => {
+                    let rs = dsnap.val().records
+                    for(let r in rs){
+                        this.records.push(rs[r])
+                        db.ref(`/users/${uid}/datas/${item.data}/records/${r}`)
+                            .on('value', nsnap => {
+                                let nr = nsnap.val()
+                                rs[r].success_counter = nr.success_counter
+                                rs[r].failed_counter  = nr.failed_counter
+                            })
+                    }
+                    this.loading_data = false
+                    this.next_word()
+                })
+        })
+        this.item_ref.on('value', (snap) => {
+            this.item = snap.val()
+        })
     }
 }
 </script>
