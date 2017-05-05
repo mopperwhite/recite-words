@@ -3,6 +3,7 @@ div#body
   router-view(v-if="store.state.firebase_initialized")
   index(v-else)
   footer.footer
+    back-button
     router-link.btn.btn-link.btn-block(to="/dashboard")
           i.fa.fa-cog
           | Dashboard
@@ -12,6 +13,7 @@ div#body
 import store from './store'
 import Index from './routes/Index.vue'
 import bus from './bus'
+import BackButton from './components/BackButton.vue'
 export default {
   name: 'app',
   data () {
@@ -20,12 +22,13 @@ export default {
     }
   },
   components: {
-    Index
+    Index,
+    BackButton
   },
   methods:{
         switch(user){
             if(!user){
-               this.$router.replace('/account')   
+               this.$router.push('/account')   
             }
         }
     },
@@ -38,13 +41,13 @@ export default {
 </script>
 
 <style>
-#app {
+#body {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 5em;
 }
 
 h1, h2 {
@@ -66,6 +69,7 @@ a {
 }
 
 .footer{
+  margin-top: 10em;
   height: 10em;
 }
 

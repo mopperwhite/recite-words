@@ -21,7 +21,6 @@ export default {
         //     this.items.push(JSON.parse(localStorage[`item/${i}`]))
         // }
         let ref = firebase.database().ref(`/users/${store.state.firebase_user.uid}/items`)
-        console.log(ref)
         ref.on('value', (snapshot) => {
             this.items = snapshot.val()
         })
