@@ -77,6 +77,7 @@ import store from '../store'
 import {youdao} from '../../keys.json'
 import shuffle from 'shuffle-array'
 import firebase from '../firebase'
+import classify_words from '../classify-words'
 const options_num = 4
 export default {
     data(){
@@ -122,7 +123,14 @@ export default {
             localStorage[k] = v
         },
         skip(){
-            this.speak(this.answer.answer, this.item.meta.lang.answer), 
+            let uid = store.state.firebase_user.uid
+            let db = firebase.database()
+            let id = this.$route.params.id
+            let p = `/users/${uid}/datas/${this.item.data}/records/${this.answer.test}`
+            this.speak(this.answer.answer, this.item.meta.lang.answer)
+            db.ref(p).update({
+                skipped_counter: this.answer.success_counter
+            })
             this.skipping = true
             this.guessing = false
             if(this.free_mode_interval){
@@ -178,7 +186,7 @@ export default {
             utterThis.lang = lang // 结果只要改语言就能正常！！！
             utterThis.rate = this.store.state.speech_rate
             // utterThis.voice = this.store.state.voice
-            window.speechSynthesis.speak(utterThis);
+            window.speechSynthesis.speak(utterThis)
         },
         try_again(){
             let uid = store.state.firebase_user.uid
@@ -214,9 +222,6 @@ export default {
                 })
         },
         next_word(){
-            this.translation = null
-            this.skipping= false
-            this.guessing = true
             let may_next = this.records
                 .filter(e => {
                     return e.success_counter < this.item.confirm_times
@@ -229,15 +234,31 @@ export default {
             let records = this.records.filter(e => {
                 return e.test != this.answer.test && e.answer != this.answer.answer 
             })
-                     
+            let classifier;
+            switch(this.item.meta.lang.answer){
+            case 'en-US':
+            case 'en-GB':
+                classifier = classify_words.en
+            break;
+            default:
+                classifier = classify_words.other
+            }
+            let records_group = classifier(this.answer, records)
+            let rest_counter = this.item.confirm_times
             let stbe = [this.answer]
-            shuffle(records)
-            for(let i=0; i<Math.min(records.length, options_num - 1);i++){
-                stbe.push(records[i])
+            for(let i = 0; rest_counter > 0 && i < records_group.length; i++){
+                let group = records_group[i]
+                let dlen  = Math.min(group.length, rest_counter)
+                shuffle(group)
+                stbe = stbe.concat( group.slice(0, dlen+1) )
+                rest_counter -= dlen
             }
             shuffle(stbe)
             this.selectable = stbe
             this.speak(this.answer.test, this.item.meta.lang.test)
+            this.translation = null
+            this.skipping= false
+            this.guessing = true
             if(this.store.state.free_mode){
                 this.remain_time = 100
                 this.free_mode_interval = setInterval(() => {

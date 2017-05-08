@@ -127,15 +127,16 @@ export default {
             data.forEach(r => {
                 r.success_counter = 0
                 r.failed_counter = 0
+                r.skiped_counter = 0
                 r.test = r.test.trim()
                 records[r.test] = r
             })
             console.log(records)
             let uid = store.state.firebase_user.uid
-            let iref = firebase.database().ref(`/users/${uid}/items`).push(item)
             let dref = firebase.database().ref(`/users/${uid}/datas`).push({
                 records
             })
+            let iref = firebase.database().ref(`/users/${uid}/items`).push(item)
             iref.update({
                 id: iref.getKey(),
                 data: dref.getKey()
