@@ -97,10 +97,6 @@ function en(answer, records){
         return [lv0, lv1, lv2, lv3]
     }else{
         let lv0 = [], lv1 = []
-        let headtree = new TrieTree, tailtree = new TrieTree
-        for(let r of records){
-            
-        }
         let at = word_type(answer.answer)
         for(let r of records){
             if(word_type(r.answer) == at){
