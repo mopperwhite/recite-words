@@ -36,9 +36,12 @@ div
                     | 下一个
             template(v-else)
                 div(v-if="guessing")
-                    template(v-for="st in selectable")
+                    template(v-for="st in selectable", v-if="!store.state.free_mode || !store.state.hard_mode || remain_time < 33")
                         button.btn.btn-block.btn-default(@click="guess(st)")
                             | {{st && st.answer}}
+                    template(v-else)
+                        h3.muted
+                            i.fa.fa-clock-o
                     span.process-bar-container.bg-muted.time-bar(v-if="store.state.free_mode")
                         div.text-left.process-bar.bg-warning(:style = '`width: ${remain_time}%;`')
                     button.btn-warning.btn.btn-block(@click="skip()")
@@ -234,16 +237,15 @@ export default {
             let records = this.records.filter(e => {
                 return e.test != this.answer.test && e.answer != this.answer.answer 
             })
-            let classifier;
-            switch(this.item.meta.lang.answer){
-            case 'en-US':
-            case 'en-GB':
-                classifier = classify_words.en
-            break;
-            default:
-                classifier = classify_words.other
+            let records_group
+            if(this.item.meta.lang.answer.match(/^en/)){
+                records_group = classify_words.en(this.answer, records, 'answer')
+            }else if(this.item.meta.lang.test.match(/^en/)){
+                records_group = classify_words.en(this.answer, records, 'answer')
+            }else{
+                records_group = classify_words.other(this.answer, records)
+
             }
-            let records_group = classifier(this.answer, records)
             let rest_counter = this.item.confirm_times
             let stbe = [this.answer]
             for(let i = 0; rest_counter > 0 && i < records_group.length; i++){

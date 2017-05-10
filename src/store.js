@@ -15,7 +15,8 @@ export default new Vuex.Store({
         voice_name: localStorage['config:voice'],
         voice_list: [],
         speech_rate: parseFloat(localStorage['config:speech_rate'] || 1.0),
-        free_mode: !!localStorage['config:free_mode']
+        free_mode: !!localStorage['config:free_mode'],
+        hard_mode: !!localStorage['config:raise_you_up_mode'],
     },
     mutations: {
         initVoices(state){
@@ -48,6 +49,13 @@ export default new Vuex.Store({
                 localStorage['config:free_mode'] = '1'
             }else{
                 delete localStorage['config:free_mode']
+            }
+        },
+        set_hard_mode(state, m){
+            if(state.hard_mode = m){
+                localStorage['config:hard_mode'] = '1'
+            }else{
+                delete localStorage['config:hard_mode']
             }
         },
         set_speech_rate(state, rate){

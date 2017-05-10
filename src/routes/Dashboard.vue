@@ -12,12 +12,16 @@ div.center-block.dashboard.container
               | {{n}}
     div.row
       div.form-group.col-xs-12.col-ms-12
-        label(for="challengeMode")
-          | 放飞自我模式
-        input.form-control#challengeMode(
-          type="checkbox", 
-          v-model="store.state.free_mode",
-          @change="store.commit('set_free_mode', store.state.free_mode)")
+        label(for="freeMode") 飞行模式
+        select.form-control#freeMode(v-model="challenge_mode", @change="fly")
+          option(value = 'normal')
+            | 休闲模式
+          option(value = 'free_mode')
+            | 放飞自我
+          option(value = 'hard_mode')
+            | 送你上天
+    h5.text-muted
+      | {{challenge_mode_description}}
     div.row
       div.form-group.col-xs-12.col-ms-12
         label(for="speedSelect")
@@ -47,12 +51,35 @@ import BackButton from '../components/BackButton.vue'
 export default {
   data () {
     return {
-      store
+      store,
+      challenge_mode: ['normal', 'free_mode', '', 'hard_mode'][ store.state.hard_mode << 1 | store.state.free_mode ],
+      challenge_mode_description: '',
     }
   },
   components: {
     Firebase,
     BackButton
+  },
+  methods: {
+    fly(){
+      switch(this.challenge_mode){
+      case 'normal':
+        store.commit('set_free_mode', false)
+        store.commit('set_hard_mode', false)
+        this.challenge_mode_description= "恣意游玩"
+      break
+      case 'free_mode':
+        store.commit('set_free_mode', true)
+        store.commit('set_hard_mode', false)
+        this.challenge_mode_description= "你将有3秒时间认出一个单词"
+      break
+      case 'hard_mode':
+        store.commit('set_free_mode', true)
+        store.commit('set_hard_mode', true)
+        this.challenge_mode_description= "你将有3秒时间认出一个单词，并且只有1秒进行选择"
+      break
+      }
+    }
   }
 }
 </script>

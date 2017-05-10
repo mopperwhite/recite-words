@@ -55,11 +55,11 @@ class TrieTree extends TrieTreeNode{
 }
 */
 
-function en(answer, records){
+function en(answer, records, key){
     const word_filter = [
         [/ly$/, 'adv'],
         [/fy$|ify$|ize$|en$|ate$|^en/, 'v'],
-        [/tion$|sion$|dom$|ance$|ity$|hood$|ery$|ship$|tude$|ism$|cracy$|logy$|ment$|al$|er$|or$|ist$|ee$|ic$|ty$/, 'n'],
+        [/tion$|sion$|dom$|ance$|ity$|hood$|ery$|ship$|tude$|ism$|cracy$|logy$|ment$|al$|er$|or$|ist$|ee$|ic$|ty$|ure$/, 'n'],
         [/ate$|ous$|al$|ing$|ed$|able$|ible$|ish$|ile$|y$|ic$|cal$|ory$|less$|ive$|ful$|ed$|le$|ant$/, 'adj'],
         [/^arr|^ass|^acc/, 'wired-things']
     ]
@@ -79,11 +79,11 @@ function en(answer, records){
         }
         return '?'
     }
-    let tokens = answer.answer.split(' ')
+    let tokens = answer[key].split(' ')
     if(tokens.length > 1){
         let lv0 = [], lv1 = [], lv2 = [], lv3 = [], lv4 = []
         for(let r of records){
-            let rts = r.answer.split(' ')
+            let rts = r[key].split(' ')
             if(overlap(rts, tokens)){
                 lv0.push(r)
             }else if(rts.length == tokens){
@@ -97,9 +97,9 @@ function en(answer, records){
         return [lv0, lv1, lv2, lv3]
     }else{
         let lv0 = [], lv1 = []
-        let at = word_type(answer.answer)
+        let at = word_type(answer[key])
         for(let r of records){
-            if(word_type(r.answer) == at){
+            if(word_type(r[key]) == at){
                 lv0.push(r)
             }else{
                 lv1.push(r)

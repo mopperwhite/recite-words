@@ -14,11 +14,11 @@ div
                     | 数据格式
                 select.form-control(v-model="data_type")
                     option(value="json")
-                        | JSON
+                        | JSON(从软件导入)
                     option(value="csv")
-                        | CSV
+                        | CSV(从电子表格复制)
                     option(value="alternate")
-                        | 按行交替
+                        | 按行交替(便于手动输入)
         div.row
             div.form-group.col-xs-12.col-ms-12
                 label
