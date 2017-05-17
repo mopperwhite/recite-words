@@ -1,14 +1,15 @@
 <template lang="jade">
 div#body
-  router-view(v-if="store.state.firebase_initialized")
+  template(v-if="store.state.firebase_initialized")
+    router-view
+    footer.footer
+      back-button
+      router-link.btn.btn-link.btn-block(to="/dashboard")
+            i.fa.fa-cog
+            | Dashboard
+      router-link.btn.btn-link.btn-block(to="/")
+            | Home
   index(v-else)
-  footer.footer
-    back-button
-    router-link.btn.btn-link.btn-block(to="/dashboard")
-          i.fa.fa-cog
-          | Dashboard
-    router-link.btn.btn-link.btn-block(to="/")
-          | Home
 </template>
 
 <script>
