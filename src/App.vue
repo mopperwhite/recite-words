@@ -7,6 +7,8 @@ div#body
     router-link.btn.btn-link.btn-block(to="/dashboard")
           i.fa.fa-cog
           | Dashboard
+    router-link.btn.btn-link.btn-block(to="/")
+          | Home
 </template>
 
 <script>

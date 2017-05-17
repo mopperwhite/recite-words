@@ -1,5 +1,6 @@
 <template lang="jade">
 div
+    h1#title 所有项目
     div(v-for="item in items")
         router-link.btn.btn-block.btn-default(:to=" '/item/' + item.id ")
             | {{item.title}}
@@ -28,8 +29,11 @@ export default {
 }
 </script>
 <style scoped>
-.btn-y{
+.btn{
     font-size: 2em;
-    margin: 0.5em;
+    margin-top: 0.5em;
+}
+#title{
+    margin-top: 2em;
 }
 </style>

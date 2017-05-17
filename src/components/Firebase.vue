@@ -12,14 +12,14 @@ div
     template(v-else)
       div.form-group
         label(for='email') Email
-        input.form-control(name="email", type='email', v-model='fb_email' placeholder='holder')
+        input.form-control(name="email", type='email', v-model='fb_email' placeholder='Email')
       div.form-group
         label(for='password') Password
-        input.form-control(type='password', name='password', v-model="fb_pwd" placeholder='holder')
+        input.form-control(type='password', name='password', v-model="fb_pwd" placeholder='Password')
       button.btn.btn-primary.btn-block(@click="firebase_login(fb_email, fb_pwd)")
-        | Login
+        | 登录
       button.btn.btn-info.btn-block(@click="firebase_register(fb_email, fb_pwd)")
-        | Create Account
+        | 注册
 </template>
 <script>
 import firebase from '../firebase'
