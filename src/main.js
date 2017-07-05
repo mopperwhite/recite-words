@@ -12,7 +12,11 @@ Vue.use(VueRouter)
 Vue.use(VueFire)
 Vue.use(VueResource)
 
-store.commit('initVoices')
+if(window.navigator.standalone){
+  window.open(window.location.href, '_blank')
+}else{
+  store.commit('initVoices')
+}
 
 new Vue({
   components: {
