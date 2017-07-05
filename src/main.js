@@ -13,10 +13,10 @@ Vue.use(VueFire)
 Vue.use(VueResource)
 
 if(window.navigator.standalone){
-  window.open(window.location.href, '_blank')
-}else{
-  store.commit('initVoices')
+  window.location.href = "chrome://" + window.location.host
 }
+
+store.commit('initVoices')
 
 new Vue({
   components: {
