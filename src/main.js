@@ -13,7 +13,7 @@ Vue.use(VueFire)
 Vue.use(VueResource)
 
 if(window.navigator.standalone){
-  console.log("googlechrome://" + window.location.host + window.location.pathname)
+  alert("googlechrome://" + window.location.host + window.location.pathname)
   window.location.href = "googlechrome://" + window.location.host + window.location.pathname
 }
 
