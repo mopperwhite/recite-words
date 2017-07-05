@@ -13,7 +13,7 @@ Vue.use(VueFire)
 Vue.use(VueResource)
 
 if(window.navigator.standalone){
-  window.location.href = "googlechrome://" + window.location.host
+  window.location.href = "googlechrome://" + window.location.host + window.location.pathname
 }
 
 store.commit('initVoices')
