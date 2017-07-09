@@ -4,8 +4,12 @@ div
     div(v-for="item in items")
         router-link.btn.btn-block.btn-default(:to=" '/item/' + item.id ")
             | {{item.title}}
-    router-link.btn.btn-block.btn-success(to="/additem")
-        | 添加
+    .container-fluid
+        .row
+            router-link.btn.btn-info.col-xs-6(to="/merge")
+                | 合并
+            router-link.btn.btn-success.col-xs-6(to="/additem")
+                | 添加
 </template>
 <script>
 import firebase from '../firebase'

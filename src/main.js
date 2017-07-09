@@ -7,6 +7,7 @@ import App from './App.vue'
 
 import store from './store'
 import router from './router'
+import bus from './bus'
 
 Vue.use(VueRouter)
 Vue.use(VueFire)
@@ -16,6 +17,18 @@ if(window.navigator.standalone){
   // alert("googlechrome://" + window.location.host + window.location.pathname)
   window.location.href = "googlechrome://" + window.location.host + window.location.pathname
 }
+
+document.addEventListener('keydown', ({ keyCode }) => {
+  bus.$emit('keydown', {
+    keyCode
+  })
+})
+
+document.addEventListener('keyup', ({ keyCode }) => {
+  bus.$emit('keyup', {
+    keyCode
+  })
+})
 
 store.commit('initVoices')
 
