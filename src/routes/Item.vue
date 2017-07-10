@@ -202,9 +202,9 @@ export default {
       let id = this.$route.params.id
       let p = `/users/${uid}/datas/${this.item.data}/records/${this.answer.test}`
       this.speak(this.answer.answer, this.item.meta.lang.answer)
-      this.answer.skipped_counter++
+      this.answer.skiped_counter++
       db.ref(p).update({
-        skipped_counter: this.answer.skipped_counter
+        skiped_counter: this.answer.skiped_counter
       })
       this.skipping = true
       this.guessing = false
@@ -323,6 +323,7 @@ export default {
         })
     },
     next_word(){
+      window.speechSynthesis.cancel()
       let may_next = this.records
         .filter(e => {
           return !e.done && e.success_counter < this.item.confirm_times
@@ -359,7 +360,6 @@ export default {
       this.translation = null
       this.skipping= false
       this.guessing = true
-      window.speechSynthesis.cancel()
       if(this.store.state.free_mode){
         this.remain_time = 100
         this.free_mode_interval = setInterval(() => {
