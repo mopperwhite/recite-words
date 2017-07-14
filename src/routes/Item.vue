@@ -95,9 +95,9 @@ div
             td {{r.failed_counter}}
       button.btn.btn-block.btn-danger(@click="delete_self") 删除本项目
     span.process-bar-container.bg-muted.text-right.counter-bar
-      div.text-left.process-bar.bg-success(:style = '`width: ${item.counter*100 / records.length}%;`')
+      div.text-left.process-bar.bg-success(:style = '`width: ${item.counter*100 / length}%;`')
         | {{item.counter}}
-      | {{records.length - item.counter}}
+      | {{length - item.counter}}
   
 </template>
 <script>
@@ -126,6 +126,7 @@ export default {
         "title" : "",
         confirm_times: 2,
       },
+      length: 1,
       utter: null,
       table_search: '',
       shift_select:{
@@ -328,6 +329,11 @@ export default {
         .filter(e => {
           return !e.done && e.success_counter < this.item.confirm_times
         })
+      this.length = this.records.filter(e => !e.done).length
+      this.item.counter = this.records.filter(e => 
+        e.success_counter === this.item.confirm_times &&
+        !e.done).length
+      console.log(this.length, this.item.counter)
       if(may_next.length == 0){
         this.the_last_one = true
         return
