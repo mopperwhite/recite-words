@@ -330,7 +330,7 @@ export default {
           return !e.done && e.success_counter < this.item.confirm_times
         })
       this.length = this.records.filter(e => !e.done).length
-      this.item.counter = this.records.filter(e => 
+      this.counter = this.records.filter(e => 
         e.success_counter === this.item.confirm_times &&
         !e.done).length
       console.log(this.length, this.item.counter)
