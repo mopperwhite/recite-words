@@ -15,9 +15,6 @@ div
       template(v-if="translation")
         h4.muted
           | {{translation.query}}
-        h4
-          | {{translation.translation}}
-        div(v-html="translation.explain")
       template(v-else)
         h4.bg-warning
           | 未找到
@@ -102,10 +99,11 @@ div
 </template>
 <script>
 import store from '../store'
-import {youdao} from '../../keys.json'
+import {yandex} from '../../keys.json'
 import shuffle from 'shuffle-array'
 import firebase from '../firebase'
 import classify_words from '../classify-words'
+import md5 from 'min-md5'
 import bus from '../bus'
 const options_num = 4
 export default {
@@ -271,15 +269,16 @@ export default {
       this.speak(this.answer.answer, this.item.meta.lang.answer)
     },
     translate (text) {
-      this.$http.jsonp(`http://fanyi.youdao.com/openapi.do?keyfrom=${youdao.keyfrom}&key=${youdao.key}&type=data&doctype=jsonp&version=1.1&q=${encodeURI(text)}`)
-        .then(res => res.json())
-        .then(res => {
-          this.translation = {
-            query: res.query,
-            translation: res.translation.join("/"),
-            explain: res.basic && res.basic.explains && res.basic.explains.join("\n<br/>\n") || ''
-          }
-        })
+      const appkey = yandex.key
+      const q = encodeURI(text)
+      const base_url = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
+      this.$http.jsonp(`${base_url}?key=${appkey}&text=${q}&lang=en-zh`)
+      .then(res => res.json())
+      .then(({text}) => {
+        this.translation = {
+          query: text.join("/")
+        }
+      })
     },
     speak(text, lang){
       if(!this.spaekingEnabled || !window.SpeechSynthesisUtterance) return;

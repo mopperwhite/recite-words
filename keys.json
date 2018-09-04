@@ -2,5 +2,8 @@
     "youdao": {
         "key": "1204333274",
         "keyfrom": "recite-words"
+    },
+    "yandex": {
+        "key": "trnsl.1.1.20180904T143343Z.ce960838a0f81906.3dc2f13ca32d3c5a0220691a3da0824fecb6a2a4"
     }
 }
