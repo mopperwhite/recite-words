@@ -1,7 +1,7 @@
 <template lang="jade">
 div
     h3.text-center
-      | 使用Firebase同步数据
+      | 使用firebaseio.com同步数据，使用yandex.com翻译
     p.text-muted.text-center.small
       | 可能需要翻墙
     template(v-if="store.state.firebase_user")
